@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:plantist_app_/Components/CustomWideButton.dart';
-import 'package:plantist_app_/Screen/WelcomeScreen/WelcomeScreenController.dart';
-import 'package:plantist_app_/Utils/ScreenUtil.dart';
-import 'package:plantist_app_/Resources/AppColors';
+import 'package:plantist_app_/Components/custom_wide_button.dart';
+import 'package:plantist_app_/Screen/WelcomeScreen/welcome_screen_controller.dart';
+import 'package:plantist_app_/Utils/screen_util.dart';
+import 'package:plantist_app_/Resources/app_colors.dart';
 
 class WelcomeScreen extends StatelessWidget {
   WelcomeScreen({super.key});

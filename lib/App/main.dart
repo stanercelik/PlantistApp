@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:plantist_app_/Resources/AppColors';
-import 'package:plantist_app_/Screen/SignInScreen/SignInScreen.dart';
-import 'package:plantist_app_/Screen/SignUpScreen/SignUpScreen.dart';
-import 'package:plantist_app_/Screen/WelcomeScreen/WelcomeScreen.dart';
+import 'package:plantist_app_/Resources/app_colors.dart';
+import 'package:plantist_app_/Screen/AuthFlow/SignInScreen/sign_in_screen.dart';
+import 'package:plantist_app_/Screen/AuthFlow/SignUpScreen/sign_up_screen.dart';
+import 'package:plantist_app_/Screen/WelcomeScreen/welcome_screen.dart';
 import '../firebase_options.dart';
 import 'package:get/get.dart';
 
@@ -29,7 +29,7 @@ class PlantistApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/', page: () => WelcomeScreen()),
         GetPage(name: '/signin', page: () => const SignInScreen()),
-        GetPage(name: '/signup', page: () => const SignUpScreen()),
+        GetPage(name: '/signup', page: () => SignUpScreen()),
       ],
     );
   }

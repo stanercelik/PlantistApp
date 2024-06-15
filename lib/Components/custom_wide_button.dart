@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:plantist_app_/Utils/ScreenUtil.dart';
+import 'package:plantist_app_/Utils/screen_util.dart';
 
 class CustomWideButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   final Color backgroundColor;
   final Color foregroundColor;
@@ -29,11 +29,13 @@ class CustomWideButton extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 foregroundColor: foregroundColor,
                 backgroundColor: backgroundColor,
-                padding: const EdgeInsets.symmetric(vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                ),
                 textStyle:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 elevation: 0,
               ),
@@ -43,12 +45,11 @@ class CustomWideButton extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 foregroundColor: foregroundColor,
                 backgroundColor: backgroundColor,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                padding: const EdgeInsets.symmetric(vertical: 24),
                 textStyle:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 elevation: 0,
               ),
