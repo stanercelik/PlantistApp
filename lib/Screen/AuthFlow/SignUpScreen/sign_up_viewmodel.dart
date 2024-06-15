@@ -12,6 +12,7 @@ class SignUpViewModel extends GetxController {
 
   var isEmailValid = false.obs;
   var isPasswordValid = false.obs;
+  var isLoading = false.obs;
 
   @override
   void onInit() {
@@ -31,32 +32,17 @@ class SignUpViewModel extends GetxController {
   }
 
   Future<void> createUser() async {
+    isLoading.value = true;
     try {
       await _authService.createUser(
         email: emailController.text,
         password: passwordController.text,
       );
+      Get.snackbar('Success', 'Account created successfully');
     } catch (e) {
       Get.snackbar('Error', e.toString());
-    }
-  }
-
-  Future<void> signIn() async {
-    try {
-      await _authService.signIn(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-    } catch (e) {
-      Get.snackbar('Error', e.toString());
-    }
-  }
-
-  Future<void> signOut() async {
-    try {
-      await _authService.signOut();
-    } catch (e) {
-      Get.snackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
 }

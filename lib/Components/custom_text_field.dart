@@ -7,15 +7,17 @@ class CustomTextField extends StatefulWidget {
   final bool obscureText;
   final TextInputType keyboardType;
   final bool isValid;
+  final bool showValidationIcon;
 
-  const CustomTextField({
-    Key? key,
-    required this.controller,
-    required this.hintText,
-    this.obscureText = false,
-    this.keyboardType = TextInputType.text,
-    this.isValid = false,
-  }) : super(key: key);
+  const CustomTextField(
+      {Key? key,
+      required this.controller,
+      required this.hintText,
+      this.obscureText = false,
+      this.keyboardType = TextInputType.text,
+      this.isValid = false,
+      this.showValidationIcon = true})
+      : super(key: key);
 
   @override
   _CustomTextFieldState createState() => _CustomTextFieldState();
@@ -60,7 +62,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         focusedBorder: const UnderlineInputBorder(
           borderSide: BorderSide(color: AppColors.textFieldUnderlineColor),
         ),
-        suffixIcon: widget.isValid
+        suffixIcon: widget.showValidationIcon && widget.isValid
             ? const Icon(
                 Icons.check_circle,
                 color: AppColors.textPrimaryColor,

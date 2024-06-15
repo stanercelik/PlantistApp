@@ -13,72 +13,85 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(flex: 4),
-              Image.asset(
-                'assets/images/plantist_logo.png',
-                height: ScreenUtil.screenHeightPercentage(context, 0.4),
-                fit: BoxFit.contain,
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top,
               ),
-              const Text(
-                'Welcome back to',
-                style: TextStyle(
-                    color: AppColors.textPrimaryColor,
-                    fontSize: 42,
-                    fontWeight: FontWeight.w200),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Plantist',
-                style: TextStyle(
-                    color: AppColors.textPrimaryColor,
-                    fontSize: 42,
-                    fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Start your productive life now!',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.textSecondaryColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const Spacer(flex: 1),
-              CustomWideButton(
-                onPressed: controller.signIn,
-                text: "Sign in with email",
-                backgroundColor: AppColors.welcomeButtonBackgroundColor,
-                foregroundColor: AppColors.textPrimaryColor,
-                icon: Icons.email,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Don't you have an account?",
-                    style: TextStyle(color: AppColors.textSecondaryColor),
-                  ),
-                  TextButton(
-                    onPressed: controller.signUp,
-                    child: const Text(
-                      "Sign up",
+              child: IntrinsicHeight(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(flex: 2), // Boşluk bırakmak için
+                    Image.asset(
+                      'assets/images/plantist_logo.png',
+                      height: ScreenUtil.screenHeightPercentage(context, 0.4),
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Welcome back to',
                       style: TextStyle(
                           color: AppColors.textPrimaryColor,
-                          fontWeight: FontWeight.w700),
+                          fontSize: 42,
+                          fontWeight: FontWeight.w200),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Plantist',
+                      style: TextStyle(
+                          color: AppColors.textPrimaryColor,
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Start your productive life now!',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.textSecondaryColor,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 24,
+                    ),
+                    CustomWideButton(
+                      onPressed: controller.signIn,
+                      text: "Sign in with email",
+                      backgroundColor: AppColors.welcomeButtonBackgroundColor,
+                      foregroundColor: AppColors.textPrimaryColor,
+                      icon: Icons.email,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Don't you have an account?",
+                          style: TextStyle(color: AppColors.textSecondaryColor),
+                        ),
+                        TextButton(
+                          onPressed: controller.signUp,
+                          child: const Text(
+                            "Sign up",
+                            style: TextStyle(
+                                color: AppColors.textPrimaryColor,
+                                fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(flex: 1), // Boşluk bırakmak için
+                  ],
+                ),
               ),
-              const Spacer(flex: 3),
-            ],
+            ),
           ),
         ),
       ),

@@ -18,5 +18,9 @@ class AuthService {
     await _firebaseAuth.signOut();
   }
 
+  Future<void> resetPassword({required String email}) async {
+    await _firebaseAuth.sendPasswordResetEmail(email: email);
+  }
+
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 }

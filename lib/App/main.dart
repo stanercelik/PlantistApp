@@ -28,7 +28,7 @@ class PlantistApp extends StatelessWidget {
       ),
       getPages: [
         GetPage(name: '/', page: () => WelcomeScreen()),
-        GetPage(name: '/signin', page: () => const SignInScreen()),
+        GetPage(name: '/signin', page: () => SignInScreen()),
         GetPage(name: '/signup', page: () => SignUpScreen()),
       ],
     );

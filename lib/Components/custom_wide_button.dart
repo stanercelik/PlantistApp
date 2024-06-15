@@ -6,6 +6,7 @@ class CustomWideButton extends StatelessWidget {
   final String text;
   final Color backgroundColor;
   final Color foregroundColor;
+  final bool isLoading;
   final IconData? icon;
 
   const CustomWideButton({
@@ -14,6 +15,7 @@ class CustomWideButton extends StatelessWidget {
     required this.text,
     required this.backgroundColor,
     required this.foregroundColor,
+    this.isLoading = false,
     this.icon,
   });
 
@@ -21,40 +23,40 @@ class CustomWideButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: ScreenUtil.screenWidth(context),
-      child: icon != null
-          ? ElevatedButton.icon(
-              onPressed: onPressed,
-              icon: Icon(icon),
-              label: Text(text),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: foregroundColor,
-                backgroundColor: backgroundColor,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 24,
-                ),
-                textStyle:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                elevation: 0,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          foregroundColor: foregroundColor,
+          backgroundColor: backgroundColor,
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          elevation: 0,
+          splashFactory: NoSplash.splashFactory, // Disable the ripple effect
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Opacity(
+              opacity: isLoading ? 0 : 1,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) Icon(icon),
+                  if (icon != null) const SizedBox(width: 0),
+                  Text(text),
+                ],
               ),
-            )
-          : ElevatedButton(
-              onPressed: onPressed,
-              style: ElevatedButton.styleFrom(
-                foregroundColor: foregroundColor,
-                backgroundColor: backgroundColor,
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                textStyle:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                elevation: 0,
-              ),
-              child: Text(text),
             ),
+            if (isLoading)
+              CircularProgressIndicator(
+                color: foregroundColor,
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
