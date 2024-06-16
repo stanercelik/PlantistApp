@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:plantist_app_/Screen/AuthFlow/SignInScreen/forgot_password_bottomsheet.dart';
+import 'package:plantist_app_/Screen/AuthFlow/SignInScreen/ForgotPasswordBottomSheet/forgot_password_bottomsheet.dart';
+import 'package:plantist_app_/Screen/AuthFlow/SignInScreen/ForgotPasswordBottomSheet/forgot_password_bottomsheet_vm.dart';
 import 'package:plantist_app_/Screen/AuthFlow/SignInScreen/sign_in_viewmodel.dart';
 import 'package:plantist_app_/Screen/AuthFlow/base_auth_screen.dart';
 
 class SignInScreen extends StatelessWidget {
   final SignInViewModel _signInViewModel = Get.put(SignInViewModel());
+  final ForgotPasswordBottomSheetViewModel _bottomSheetViewModel =
+      Get.put(ForgotPasswordBottomSheetViewModel());
 
   SignInScreen({super.key});
 
@@ -26,11 +29,13 @@ class SignInScreen extends StatelessWidget {
         showModalBottomSheet(
           context: context,
           builder: (context) => ForgotPasswordBottomSheet(
-            isEmailValid: _signInViewModel.isEmailValid,
-            emailController: _signInViewModel.forgotPasswordEmailController,
-            onSendPressed: () => _signInViewModel.forgotPassword(
-                email: _signInViewModel.forgotPasswordEmailController.text),
-            isLoading: _signInViewModel.isForgotPasswordLoading,
+            isEmailValid: _bottomSheetViewModel.isForgotPasswordEmailValid,
+            emailController:
+                _bottomSheetViewModel.forgotPasswordEmailController,
+            onSendPressed: () => _bottomSheetViewModel.forgotPassword(
+                email:
+                    _bottomSheetViewModel.forgotPasswordEmailController.text),
+            isLoading: _bottomSheetViewModel.isForgotPasswordLoading,
           ),
         );
       },

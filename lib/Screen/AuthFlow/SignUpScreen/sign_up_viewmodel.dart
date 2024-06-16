@@ -24,7 +24,7 @@ class SignUpViewModel extends GetxController {
   }
 
   void validateEmail() {
-    isEmailValid.value = GetUtils.isEmail(emailController.text);
+    isEmailValid.value = GetUtils.isEmail(emailController.text.trim());
   }
 
   void validatePassword() {

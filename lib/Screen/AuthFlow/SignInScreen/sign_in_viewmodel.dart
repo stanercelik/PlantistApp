@@ -9,13 +9,12 @@ class SignInViewModel extends GetxController {
   var user = Rx<User?>(null);
 
   final emailController = TextEditingController();
-  final forgotPasswordEmailController = TextEditingController();
   final passwordController = TextEditingController();
 
   var isEmailValid = false.obs;
+  var isForgotPasswordemailValid = false.obs;
   var isPasswordValid = false.obs;
   var isLoading = false.obs;
-  var isForgotPasswordLoading = false.obs;
 
   @override
   void onInit() {
@@ -38,7 +37,7 @@ class SignInViewModel extends GetxController {
     isLoading.value = true;
     try {
       await _authService.signIn(
-        email: emailController.text,
+        email: emailController.text.trim(),
         password: passwordController.text,
       );
       Get.snackbar(
@@ -58,18 +57,6 @@ class SignInViewModel extends GetxController {
       );
     } finally {
       isLoading.value = false;
-    }
-  }
-
-  Future<void> forgotPassword({required String email}) async {
-    isForgotPasswordLoading.value = true;
-    try {
-      await _authService.resetPassword(email: email);
-      Get.snackbar('Success', 'Password reset email sent to $email');
-    } catch (e) {
-      Get.snackbar('Error', e.toString());
-    } finally {
-      isForgotPasswordLoading.value = false;
     }
   }
 
