@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:plantist_app_/Screen/AuthFlow/SignInScreen/ForgotPasswordBottomSheet/forgot_password_bottomsheet.dart';
-import 'package:plantist_app_/Screen/AuthFlow/SignInScreen/ForgotPasswordBottomSheet/forgot_password_bottomsheet_vm.dart';
-import 'package:plantist_app_/Screen/AuthFlow/SignInScreen/sign_in_viewmodel.dart';
-import 'package:plantist_app_/Screen/AuthFlow/base_auth_screen.dart';
+import 'package:plantist_app_/Screen/AuthFlow/SignInFlow/ForgotPasswordBottomSheet/forgot_password_bottomsheet.dart';
+import 'package:plantist_app_/Screen/AuthFlow/SignInFlow/ForgotPasswordBottomSheet/forgot_password_bottomsheet_vm.dart';
+import 'package:plantist_app_/Screen/AuthFlow/SignInFlow/SignInScreen/sign_in_viewmodel.dart';
+import 'package:plantist_app_/Screen/AuthFlow/BaseAuth/base_auth_screen.dart';
 
 class SignInScreen extends StatelessWidget {
   final SignInViewModel _signInViewModel = Get.put(SignInViewModel());

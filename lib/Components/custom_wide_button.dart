@@ -28,7 +28,7 @@ class CustomWideButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           foregroundColor: foregroundColor,
           backgroundColor: backgroundColor,
-          padding: const EdgeInsets.symmetric(vertical: 24),
+          padding: const EdgeInsets.symmetric(vertical: 22),
           textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -44,8 +44,15 @@ class CustomWideButton extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (icon != null) Icon(icon),
+                  if (icon != null)
+                    Icon(
+                      icon,
+                      size: 30,
+                    ),
                   if (icon != null) const SizedBox(width: 0),
+                  const SizedBox(
+                    width: 4,
+                  ),
                   Text(text),
                 ],
               ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plantist_app_/Screen/AuthFlow/SignUpScreen/sign_up_viewmodel.dart';
-import 'package:plantist_app_/Screen/AuthFlow/base_auth_screen.dart';
+import 'package:plantist_app_/Screen/AuthFlow/BaseAuth/base_auth_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
   final SignUpViewModel _signUpViewModel = Get.put(SignUpViewModel());

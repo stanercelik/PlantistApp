@@ -6,8 +6,12 @@ class CustomTextField extends StatefulWidget {
   final String hintText;
   final bool obscureText;
   final TextInputType keyboardType;
+  final InputBorder? borderStyle;
+  final InputBorder? disabledBorderStyle;
   final bool isValid;
   final bool showValidationIcon;
+  final int maxLine;
+  final TextStyle hintStyle;
 
   const CustomTextField(
       {Key? key,
@@ -16,6 +20,16 @@ class CustomTextField extends StatefulWidget {
       this.obscureText = false,
       this.keyboardType = TextInputType.text,
       this.isValid = false,
+      this.borderStyle = const UnderlineInputBorder(
+          borderSide: BorderSide(color: AppColors.textFieldUnderlineColor)),
+      this.disabledBorderStyle = const UnderlineInputBorder(
+          borderSide: BorderSide(color: AppColors.textFieldUnderlineColor)),
+      this.maxLine = 1,
+      this.hintStyle = const TextStyle(
+        color: AppColors.textFieldHintcolor,
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+      ),
       this.showValidationIcon = true})
       : super(key: key);
 
@@ -41,6 +55,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      maxLines: widget.maxLine,
       controller: widget.controller,
       obscureText: _obscureText,
       style: const TextStyle(
@@ -51,17 +66,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
       keyboardType: widget.keyboardType,
       decoration: InputDecoration(
         hintText: widget.hintText,
-        hintStyle: const TextStyle(
-          color: AppColors.textFieldHintcolor,
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-        ),
-        enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: AppColors.textFieldUnderlineColor),
-        ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: AppColors.textFieldUnderlineColor),
-        ),
+        hintStyle: widget.hintStyle,
+        enabledBorder: widget.disabledBorderStyle,
+        focusedBorder: widget.borderStyle,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
         suffixIcon: widget.showValidationIcon && widget.isValid
             ? const Icon(
                 Icons.check_circle,
