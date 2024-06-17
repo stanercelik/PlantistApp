@@ -26,8 +26,10 @@ class CustomWideButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
+          disabledForegroundColor: foregroundColor,
           foregroundColor: foregroundColor,
           backgroundColor: backgroundColor,
+          disabledBackgroundColor: backgroundColor,
           padding: const EdgeInsets.symmetric(vertical: 22),
           textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(

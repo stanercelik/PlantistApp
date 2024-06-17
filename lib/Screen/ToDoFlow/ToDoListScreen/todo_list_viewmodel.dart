@@ -22,20 +22,13 @@ class TodoListViewModel extends GetxController {
     getUserTodos().listen((QuerySnapshot snapshot) {
       todos.value = snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>?;
-        return Todo(
-          id: doc.id,
-          title: data?['title'] ?? '',
-          note: data?['note'] ?? '',
-          priority: data?['priority'] ?? 0,
-          dueDate: (data?['dueDate'] as Timestamp).toDate(),
-          category: data?['category'] ?? '',
-          tags: List<String>.from(data?['tags'] ?? []),
-          attachment: (data != null && data.containsKey('attachment'))
-              ? data['attachment']
-              : null,
-        );
+        print("Raw Data: ${data.toString()}");
+        Todo todo = Todo.fromMap(doc.id, data ?? {});
+        print("Fetched TODO: ${todo.toMap()}");
+        return todo;
       }).toList();
       filteredTodos.assignAll(todos);
+      print("Filtered TODOs: ${filteredTodos.length}");
     });
   }
 
@@ -60,6 +53,7 @@ class TodoListViewModel extends GetxController {
           .doc(user.uid)
           .collection('todos')
           .add(todoData);
+      fetchTodos();
     }
   }
 
