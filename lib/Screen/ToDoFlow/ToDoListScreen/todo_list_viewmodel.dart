@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:plantist_app_/Model/todo_model.dart';
 
 class TodoListViewModel extends GetxController {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   RxList<Todo> todos = RxList<Todo>();
   RxList<Todo> filteredTodos = RxList<Todo>();
   RxBool isSearching = false.obs;
@@ -13,47 +15,76 @@ class TodoListViewModel extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    todos.bindStream(getTodos());
-    filteredTodos.bindStream(getTodos());
-    debounce(searchQuery, (_) => searchTodos(searchQuery.value),
-        time: const Duration(milliseconds: 300));
+    fetchTodos();
   }
 
-  Stream<List<Todo>> getTodos() {
-    return firestore.collection('todos').snapshots().map((QuerySnapshot query) {
-      List<Todo> retVal = [];
-      for (var element in query.docs) {
-        retVal.add(Todo.fromMap(element.data() as Map<String, dynamic>));
-      }
-      retVal.sort((a, b) => a.priority.compareTo(b.priority));
-      return retVal;
+  void fetchTodos() {
+    getUserTodos().listen((QuerySnapshot snapshot) {
+      todos.value = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>?;
+        return Todo(
+          id: doc.id,
+          title: data?['title'] ?? '',
+          note: data?['note'] ?? '',
+          priority: data?['priority'] ?? 0,
+          dueDate: (data?['dueDate'] as Timestamp).toDate(),
+          category: data?['category'] ?? '',
+          tags: List<String>.from(data?['tags'] ?? []),
+          attachment: (data != null && data.containsKey('attachment'))
+              ? data['attachment']
+              : null,
+        );
+      }).toList();
+      filteredTodos.assignAll(todos);
     });
   }
 
-  Future<void> addTodo(Todo todo) async {
-    try {
-      DocumentReference docRef =
-          await firestore.collection('todos').add(todo.toMap());
-      todo.id = docRef.id;
-      await updateTodo(todo);
-    } catch (e) {
-      Get.snackbar("Error", e.toString());
+  Stream<QuerySnapshot> getUserTodos() {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      return _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('todos')
+          .snapshots();
+    } else {
+      throw Exception("User not logged in");
     }
   }
 
-  Future<void> updateTodo(Todo todo) async {
-    try {
-      await firestore.collection('todos').doc(todo.id).update(todo.toMap());
-    } catch (e) {
-      Get.snackbar("Error", e.toString());
+  Future<void> addTodo(Map<String, dynamic> todoData) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('todos')
+          .add(todoData);
     }
   }
 
-  Future<void> deleteTodo(String id) async {
-    try {
-      await firestore.collection('todos').doc(id).delete();
-    } catch (e) {
-      Get.snackbar("Error", e.toString());
+  Future<void> deleteTodo(String todoId) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('todos')
+          .doc(todoId)
+          .delete();
+    }
+  }
+
+  Future<void> updateTodo(
+      String todoId, Map<String, dynamic> updatedData) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('todos')
+          .doc(todoId)
+          .update(updatedData);
     }
   }
 

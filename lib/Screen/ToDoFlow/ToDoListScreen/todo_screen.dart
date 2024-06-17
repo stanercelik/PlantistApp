@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:plantist_app_/Components/custom_wide_button.dart';
@@ -9,27 +10,13 @@ import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/AddToDoBottomSheet/add
 import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_viewmodel.dart';
 
 class ToDoScreen extends StatelessWidget {
-  final TodoListViewModel todoController = Get.put(TodoListViewModel());
+  final TodoListViewModel todoVM = Get.put(TodoListViewModel());
   final TextEditingController _searchController = TextEditingController();
   final SignInViewModel viewmodel = SignInViewModel();
 
   ToDoScreen({super.key});
 
-  String formatDate(DateTime date) {
-    DateTime today = DateTime.now();
-    DateTime tomorrow = today.add(const Duration(days: 1));
-    if (DateFormat('dd.MM.yyyy').format(date) ==
-        DateFormat('dd.MM.yyyy').format(today)) {
-      return 'Today';
-    } else if (DateFormat('dd.MM.yyyy').format(date) ==
-        DateFormat('dd.MM.yyyy').format(tomorrow)) {
-      return 'Tomorrow';
-    } else {
-      return DateFormat('dd.MM.yyyy').format(date);
-    }
-  }
-
-  void _showAddTodoBottomSheet(BuildContext context) {
+  void _showAddTodoBottomSheet(BuildContext context, {Todo? todo}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -47,7 +34,7 @@ class ToDoScreen extends StatelessWidget {
         title: Padding(
           padding: const EdgeInsets.only(top: 20.0),
           child: Obx(() {
-            return todoController.isSearching.value
+            return todoVM.isSearching.value
                 ? TextField(
                     controller: _searchController,
                     decoration: const InputDecoration(
@@ -58,7 +45,8 @@ class ToDoScreen extends StatelessWidget {
                       ),
                     ),
                     onChanged: (query) {
-                      todoController.searchQuery.value = query;
+                      todoVM.searchQuery.value = query;
+                      todoVM.searchTodos(query);
                     },
                   )
                 : const Text(
@@ -77,14 +65,15 @@ class ToDoScreen extends StatelessWidget {
               color: AppColors.textPrimaryColor,
               iconSize: 36,
               icon: Obx(() {
-                return Icon(todoController.isSearching.value
+                return Icon(todoVM.isSearching.value
                     ? Icons.close_rounded
                     : Icons.search_rounded);
               }),
               onPressed: () {
-                todoController.toggleSearch();
-                if (!todoController.isSearching.value) {
+                todoVM.toggleSearch();
+                if (!todoVM.isSearching.value) {
                   _searchController.clear();
+                  todoVM.searchTodos(''); // Clear search results
                 }
               },
             ),
@@ -95,7 +84,7 @@ class ToDoScreen extends StatelessWidget {
       body: Stack(
         children: [
           Obx(() {
-            if (todoController.filteredTodos.isEmpty) {
+            if (todoVM.filteredTodos.isEmpty) {
               return const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -114,8 +103,8 @@ class ToDoScreen extends StatelessWidget {
               );
             } else {
               Map<String, List<Todo>> groupedTodos = {};
-              for (var todo in todoController.filteredTodos) {
-                String dateKey = formatDate(todo.dueDate);
+              for (var todo in todoVM.filteredTodos) {
+                String dateKey = todoVM.formatDate(todo.dueDate);
                 if (!groupedTodos.containsKey(dateKey)) {
                   groupedTodos[dateKey] = [];
                 }
@@ -140,85 +129,111 @@ class ToDoScreen extends StatelessWidget {
                         ),
                       ),
                       ...todos.map((todo) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 2.0),
-                          child: ListTile(
-                            title: Text(
-                              todo.title,
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.textPrimaryColor),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(
-                                  height: 6,
-                                ),
-                                Text(todo.category,
-                                    style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w300,
-                                        color: AppColors.textSecondaryColor)),
-                                const SizedBox(
-                                  height: 16,
-                                ),
-                                if (todo.attachment != null)
-                                  const Text("1 Attachment"),
-                                const Divider()
-                              ],
-                            ),
-                            leading: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 24,
-                                  width: 24,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: todo.priority == 1
-                                          ? Colors.redAccent
-                                          : todo.priority == 2
-                                              ? Colors.orangeAccent
-                                              : todo.priority == 3
-                                                  ? Colors.blueAccent
-                                                  : Colors.grey,
-                                      width: 2.0,
-                                    ),
+                        return Slidable(
+                          key: Key(todo.id),
+                          endActionPane: ActionPane(
+                            motion: const ScrollMotion(),
+                            children: [
+                              SlidableAction(
+                                onPressed: (context) {
+                                  _showAddTodoBottomSheet(context, todo: todo);
+                                },
+                                backgroundColor: Colors.grey,
+                                foregroundColor: Colors.white,
+                                label: 'Edit',
+                              ),
+                              SlidableAction(
+                                onPressed: (context) {
+                                  todoVM.deleteTodo(todo.id);
+                                },
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                label: 'Delete',
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 2.0),
+                            child: ListTile(
+                              title: Text(
+                                todo.title,
+                                style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.textPrimaryColor),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 6,
                                   ),
-                                  child: Container(
+                                  Text(todo.category,
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w300,
+                                          color: AppColors.textSecondaryColor)),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  if (todo.attachment != null)
+                                    const Text("1 Attachment"),
+                                  const Divider()
+                                ],
+                              ),
+                              leading: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 24,
+                                    width: 24,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: todo.priority == 1
-                                          ? Colors.red.withOpacity(0.1)
-                                          : todo.priority == 2
-                                              ? Colors.orange.withOpacity(0.1)
-                                              : todo.priority == 3
-                                                  ? Colors.blue.withOpacity(0.1)
-                                                  : Colors.grey
-                                                      .withOpacity(0.1),
+                                      border: Border.all(
+                                        color: todo.priority == 1
+                                            ? Colors.redAccent
+                                            : todo.priority == 2
+                                                ? Colors.orangeAccent
+                                                : todo.priority == 3
+                                                    ? Colors.blueAccent
+                                                    : Colors.grey,
+                                        width: 2.0,
+                                      ),
+                                    ),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: todo.priority == 1
+                                            ? Colors.red.withOpacity(0.1)
+                                            : todo.priority == 2
+                                                ? Colors.orange.withOpacity(0.1)
+                                                : todo.priority == 3
+                                                    ? Colors.blue
+                                                        .withOpacity(0.1)
+                                                    : Colors.grey
+                                                        .withOpacity(0.1),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            trailing: Column(
-                              children: [
-                                Column(
-                                  children: [
-                                    Text(
-                                      DateFormat('dd.MM.yyyy')
-                                          .format(todo.dueDate),
-                                      style: const TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w400,
-                                          color: AppColors.textSecondaryColor),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                ],
+                              ),
+                              trailing: Column(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        DateFormat('dd.MM.yyyy')
+                                            .format(todo.dueDate),
+                                        style: const TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w400,
+                                            color:
+                                                AppColors.textSecondaryColor),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         );

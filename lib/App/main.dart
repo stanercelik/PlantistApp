@@ -7,14 +7,11 @@ import 'package:plantist_app_/Screen/AuthFlow/SignUpScreen/sign_up_screen.dart';
 import 'package:plantist_app_/Screen/AuthFlow/BaseAuth/user_auth_controller.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_screen.dart';
 import 'package:plantist_app_/Screen/WelcomeScreen/welcome_screen.dart';
-import '../Database/firebase_options.dart';
 import 'package:get/get.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp();
   Get.put(UserAuthController());
   runApp(const PlantistApp());
 }

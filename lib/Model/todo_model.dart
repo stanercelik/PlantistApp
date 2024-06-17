@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Todo {
-  String id;
-  String title;
-  String note;
-  int priority; // 1 = High (Red), 2 = Medium (Orange), 3 = Low (Blue), 4 = None (White)
-  DateTime dueDate;
-  String category;
-  List<String> tags;
-  String? attachment;
+  final String id;
+  final String title;
+  final String note;
+  final int priority;
+  final DateTime dueDate;
+  final String category;
+  final List<String> tags;
+  final dynamic attachment; // Attachment için dinamik tür
 
   Todo({
     required this.id,

@@ -111,7 +111,6 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
             ),
             GestureDetector(
               onTap: () {
-                // Navigate to details screen
                 _showAddTodoDetailsBottomSheet(
                     context, titleController.text, noteController.text);
               },
@@ -148,7 +147,11 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                               ),
                             ],
                           ),
-                          Icon(Icons.arrow_forward_ios),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.grey,
+                            size: 20,
+                          ),
                         ],
                       ),
                     )),

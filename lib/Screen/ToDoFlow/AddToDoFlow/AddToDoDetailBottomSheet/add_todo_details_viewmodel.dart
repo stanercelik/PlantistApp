@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:plantist_app_/Model/todo_model.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_viewmodel.dart';
 
 class TodoDetailsViewModel extends GetxController {
@@ -16,6 +15,11 @@ class TodoDetailsViewModel extends GetxController {
 
   void setDate(DateTime date) {
     selectedDate.value = date;
+    if (selectedDate.value == null) {
+      Get.snackbar("Error", "Please enter a due date.",
+          snackPosition: SnackPosition.TOP);
+      return;
+    }
   }
 
   void setTime(TimeOfDay time) {
@@ -38,16 +42,20 @@ class TodoDetailsViewModel extends GetxController {
       return;
     }
 
-    Todo newTodo = Todo(
-      id: '',
-      title: title,
-      note: note,
-      priority: priority.value,
-      dueDate: selectedDate.value ?? DateTime.now(),
-      category: categoryController.text,
-      tags: tags,
-    );
-    todoController.addTodo(newTodo);
-    Get.back();
+    Map<String, dynamic> todoData = {
+      'title': title,
+      'note': note,
+      'priority': priority.value,
+      'dueDate': selectedDate.value ?? DateTime.now(),
+      'category': categoryController.text,
+      'tags': tags,
+      'attachment': null,
+    };
+
+    todoController.addTodo(todoData).then((value) {
+      Get.back();
+    }).catchError((error) {
+      Get.snackbar("Error", error.toString());
+    });
   }
 }
