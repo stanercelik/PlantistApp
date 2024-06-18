@@ -8,10 +8,16 @@ import 'package:plantist_app_/Screen/AuthFlow/BaseAuth/user_auth_controller.dart
 import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_screen.dart';
 import 'package:plantist_app_/Screen/WelcomeScreen/welcome_screen.dart';
 import 'package:get/get.dart';
+import 'package:plantist_app_/Utils/notification_helper.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Europe/Istanbul'));
+  await NotificationHelper.initialize();
   Get.put(UserAuthController());
   runApp(const PlantistApp());
 }

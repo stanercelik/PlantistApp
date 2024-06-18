@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:plantist_app_/Model/todo_model.dart';
+import 'package:plantist_app_/Utils/notification_helper.dart';
 
 class TodoListViewModel extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -22,13 +23,10 @@ class TodoListViewModel extends GetxController {
     getUserTodos().listen((QuerySnapshot snapshot) {
       todos.value = snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>?;
-        print("Raw Data: ${data.toString()}");
         Todo todo = Todo.fromMap(doc.id, data ?? {});
-        print("Fetched TODO: ${todo.toMap()}");
         return todo;
       }).toList();
       filteredTodos.assignAll(todos);
-      print("Filtered TODOs: ${filteredTodos.length}");
     });
   }
 
@@ -40,6 +38,20 @@ class TodoListViewModel extends GetxController {
           .doc(user.uid)
           .collection('todos')
           .snapshots();
+    } else {
+      throw Exception("User not logged in");
+    }
+  }
+
+  Future<DocumentSnapshot> getTodoDocument(String todoId) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      return await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('todos')
+          .doc(todoId)
+          .get();
     } else {
       throw Exception("User not logged in");
     }
@@ -66,6 +78,7 @@ class TodoListViewModel extends GetxController {
           .collection('todos')
           .doc(todoId)
           .delete();
+      NotificationHelper.unScheduleNotification(todoId.hashCode);
     }
   }
 

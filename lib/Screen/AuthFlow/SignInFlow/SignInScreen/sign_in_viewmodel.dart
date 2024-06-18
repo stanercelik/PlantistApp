@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:plantist_app_/Service/auth_service.dart';
+import 'package:plantist_app_/Service/biometric_auth_service.dart';
 
 class SignInViewModel extends GetxController {
   final AuthService _authService = AuthService();
+  final BiometricAuthService _biometricAuthService = BiometricAuthService();
 
   var user = Rx<User?>(null);
 
@@ -12,7 +14,7 @@ class SignInViewModel extends GetxController {
   final passwordController = TextEditingController();
 
   var isEmailValid = false.obs;
-  var isForgotPasswordemailValid = false.obs;
+  var isForgotPasswordEmailValid = false.obs;
   var isPasswordValid = false.obs;
   var isLoading = false.obs;
 
@@ -47,6 +49,55 @@ class SignInViewModel extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> signInWithBiometrics() async {
+    isLoading.value = true;
+    try {
+      bool isAuthenticated = await _biometricAuthService.authenticate();
+      if (isAuthenticated) {
+        var credentials = await _biometricAuthService.getStoredCredentials();
+        if (credentials['email'] != null && credentials['password'] != null) {
+          await _authService.signIn(
+            email: credentials['email']!.trim(),
+            password: credentials['password']!,
+          );
+          Get.snackbar(
+            'Success',
+            'Authenticated successfully',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+        } else {
+          Get.snackbar(
+            'Error',
+            'Stored credentials not found',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      } else {
+        Get.snackbar(
+          'Error',
+          'Biometric authentication failed',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     } catch (e) {
       Get.snackbar(
         'Error',

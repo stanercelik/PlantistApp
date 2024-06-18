@@ -3,20 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:plantist_app_/Components/custom_text_field.dart';
+import 'package:plantist_app_/Model/todo_model.dart';
 import 'package:plantist_app_/Resources/app_colors.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/add_todo_viewmodel.dart';
 import 'package:plantist_app_/Utils/screen_util.dart';
 
 class AddTodoDetailsScreen extends StatelessWidget {
-  final String title;
-  final String note;
+  final Todo? todo;
 
-  const AddTodoDetailsScreen(
-      {super.key, required this.title, required this.note});
+  const AddTodoDetailsScreen({super.key, this.todo});
 
   @override
   Widget build(BuildContext context) {
     final AddTodoViewModel viewModel = Get.put(AddTodoViewModel());
+
+    if (todo != null) {
+      viewModel.todoId = todo!.id;
+      viewModel.titleController.text = todo!.title;
+      viewModel.noteController.text = todo!.note;
+      viewModel.setPriority(todo!.priority);
+      viewModel.selectedDate.value = todo!.dueDate;
+      viewModel.dateSwitch.value = true;
+      viewModel.selectedTime.value = todo!.dueTime;
+      viewModel.timeSwitch.value = todo!.dueTime != null;
+      viewModel.category.value = viewModel.categoryList.indexOf(todo!.category);
+      viewModel.tags.assignAll(todo!.tags);
+      viewModel.attachment.value = todo!.attachment;
+    }
 
     return SizedBox(
       height: ScreenUtil.screenHeightPercentage(context, 0.9),
@@ -53,9 +66,9 @@ class AddTodoDetailsScreen extends StatelessWidget {
                 ),
                 trailing: CupertinoButton(
                   padding: EdgeInsets.zero,
-                  onPressed: () => viewModel.saveTodo(title, note),
+                  onPressed: () => viewModel.saveTodo(),
                   child: Text(
-                    "Add",
+                    todo != null ? "Update" : "Add",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -320,10 +333,20 @@ class AddTodoDetailsScreen extends StatelessWidget {
                       value: viewModel.categoryList[viewModel.category.value],
                     )),
               ),
-              const DetailsContainerWidget(
-                title: "Attach a file",
-                icon: Icons.attach_file,
-              ),
+              Obx(() {
+                if (viewModel.attachment.value != null) {
+                  return const DetailsContainerWidget(
+                    title: "Attachment",
+                    value: "Attached",
+                    icon: Icons.attach_file,
+                  );
+                } else {
+                  return const DetailsContainerWidget(
+                    title: "Attach a file",
+                    icon: Icons.attach_file,
+                  );
+                }
+              }),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: CustomTextField(
@@ -458,20 +481,4 @@ class PickerRowWidget extends StatelessWidget {
       ],
     );
   }
-}
-
-void _showAddTodoDetailsBottomSheet(
-    BuildContext context, String title, String note) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (context) {
-      return SizedBox(
-        child: AddTodoDetailsScreen(title: title, note: note),
-      );
-    },
-  );
 }

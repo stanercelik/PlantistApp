@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plantist_app_/Model/todo_model.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_viewmodel.dart';
-import 'package:textfield_tags/textfield_tags.dart';
+import 'package:plantist_app_/Utils/notification_helper.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 enum Priority { high, medium, low, none }
 
@@ -11,7 +12,6 @@ class AddTodoViewModel extends GetxController {
   final TextEditingController tagController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
-  final StringTagController stringTagController = StringTagController();
   final tags = <String>[].obs;
   final selectedDate = Rxn<DateTime>();
   final selectedTime = Rxn<TimeOfDay>();
@@ -19,6 +19,8 @@ class AddTodoViewModel extends GetxController {
   final timeSwitch = false.obs;
   final priority = Priority.none.obs;
   final category = 0.obs;
+  final attachment = Rxn<dynamic>();
+  String? todoId;
 
   final categoryList = [
     "Work",
@@ -77,32 +79,50 @@ class AddTodoViewModel extends GetxController {
     }
   }
 
-  void saveTodo(String title, String note) {
+  void saveTodo() async {
     if (!isFormValid()) {
       Get.snackbar("Error", "Please fill in all fields: ${missingFields()}",
-          snackPosition: SnackPosition.BOTTOM);
+          snackPosition: SnackPosition.TOP);
       return;
     }
 
-    Map<String, dynamic> todoData = {
-      'title': title,
-      'note': note,
-      'priority': priorityToString(priority.value),
-      'dueDate': selectedDate.value ?? DateTime.now(),
-      'dueTime': selectedTime.value != null
-          ? '${selectedTime.value!.hour}:${selectedTime.value!.minute}'
-          : null,
-      'category': categoryList[category.value],
-      'tags': tags,
-      'attachment': null,
-    };
+    Todo todo = Todo(
+      id: todoId ?? UniqueKey().toString(),
+      title: titleController.text,
+      note: noteController.text,
+      priority: priority.value,
+      dueDate: selectedDate.value ?? DateTime.now(),
+      dueTime: selectedTime.value,
+      category: categoryList[category.value],
+      tags: tags,
+      attachment: attachment.value,
+    );
 
-    todoController.addTodo(todoData).then((value) {
-      todoController.fetchTodos();
-      Get.back();
-    }).catchError((error) {
-      Get.snackbar("Error", error.toString());
-    });
+    if (todoId == null) {
+      // New Todo
+      todoController.addTodo(todo.toMap()).then((value) {
+        _scheduleNotifications(todo);
+        todoController.fetchTodos();
+        Get.back();
+      }).catchError((error) {
+        Get.snackbar("Error", error.toString());
+      });
+    } else {
+      // Existing Todo - Update
+      final existingDoc = await todoController.getTodoDocument(todo.id);
+      if (existingDoc.exists) {
+        todoController.updateTodo(todo.id, todo.toMap()).then((value) {
+          _scheduleNotifications(todo);
+          todoController.fetchTodos();
+          Get.back();
+        }).catchError((error) {
+          Get.snackbar("Error", error.toString());
+        });
+      } else {
+        Get.snackbar("Error", "Document not found",
+            snackPosition: SnackPosition.TOP);
+      }
+    }
   }
 
   void clearAllFields() {
@@ -116,6 +136,8 @@ class AddTodoViewModel extends GetxController {
     timeSwitch.value = false;
     priority.value = Priority.none;
     category.value = 0;
+    attachment.value = null;
+    todoId = null;
   }
 
   bool isFormValid() {
@@ -136,6 +158,24 @@ class AddTodoViewModel extends GetxController {
 
   void updateFormValidState() {
     update();
+  }
+
+  void _scheduleNotifications(Todo todo) {
+    tz.initializeTimeZones();
+
+    DateTime dueDateTime = DateTime(
+      todo.dueDate.year,
+      todo.dueDate.month,
+      todo.dueDate.day,
+      todo.dueTime?.hour ?? 0,
+      todo.dueTime?.minute ?? 0,
+    );
+    NotificationHelper.scheduleNotification(
+      id: todo.id.hashCode,
+      title: "Reminder: ${todo.title}",
+      body: "Your TODO is due is now.",
+      scheduledDateTime: dueDateTime,
+    );
   }
 
   @override

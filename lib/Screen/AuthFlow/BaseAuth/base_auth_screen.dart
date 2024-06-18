@@ -16,6 +16,7 @@ class BaseAuthScreen extends StatelessWidget {
   final RxBool haveForgotPassword;
   final VoidCallback onButtonPressed;
   final VoidCallback? onForgotPasswordPressed;
+  final VoidCallback? onBiometricAuthPressed;
 
   const BaseAuthScreen({
     super.key,
@@ -30,6 +31,7 @@ class BaseAuthScreen extends StatelessWidget {
     required this.onButtonPressed,
     required this.haveForgotPassword,
     this.onForgotPasswordPressed,
+    this.onBiometricAuthPressed,
   });
 
   @override
@@ -77,7 +79,7 @@ class BaseAuthScreen extends StatelessWidget {
               Obx(
                 () => CustomTextField(
                   controller: emailController,
-                  hintText: 'E-mail',
+                  hintText: 'E-posta',
                   keyboardType: TextInputType.emailAddress,
                   isValid: isEmailValid.value,
                 ),
@@ -86,7 +88,7 @@ class BaseAuthScreen extends StatelessWidget {
               Obx(
                 () => CustomTextField(
                   controller: passwordController,
-                  hintText: 'Password',
+                  hintText: 'Şifre',
                   obscureText: true,
                   isValid: isPasswordValid.value,
                   keyboardType: TextInputType.visiblePassword,
@@ -100,7 +102,7 @@ class BaseAuthScreen extends StatelessWidget {
                         TextButton(
                             onPressed: onForgotPasswordPressed,
                             child: const Text(
-                              "Forgot password?",
+                              "Şifrenizi mi unuttunuz?",
                               style: TextStyle(
                                   color: AppColors.textBlueColor,
                                   fontWeight: FontWeight.w500),
@@ -129,7 +131,7 @@ class BaseAuthScreen extends StatelessWidget {
                   alignment: WrapAlignment.center,
                   children: [
                     const Text(
-                      'By continuing, you agree to our',
+                      'Devam ederek,',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 14, color: AppColors.textSecondaryColor),
@@ -138,13 +140,13 @@ class BaseAuthScreen extends StatelessWidget {
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('Privacy Policy tapped')),
+                              content: Text('Gizlilik Politikası tapped')),
                         );
                       },
                       child: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 4.0),
                         child: Text(
-                          'Privacy Policy',
+                          'Gizlilik Politikamızı',
                           style: TextStyle(
                               fontSize: 14,
                               color: AppColors.textPrimaryColor,
@@ -154,18 +156,19 @@ class BaseAuthScreen extends StatelessWidget {
                       ),
                     ),
                     const Text(
-                      'and ',
+                      ' ve ',
                       style: TextStyle(
                           fontSize: 14, color: AppColors.textSecondaryColor),
                     ),
                     GestureDetector(
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Terms of Use tapped')),
+                          const SnackBar(
+                              content: Text('Kullanım Şartları tapped')),
                         );
                       },
                       child: const Text(
-                        'Terms of Use',
+                        'Kullanım Şartlarımızı',
                         style: TextStyle(
                             fontSize: 14,
                             color: AppColors.textPrimaryColor,
@@ -174,11 +177,19 @@ class BaseAuthScreen extends StatelessWidget {
                       ),
                     ),
                     const Text(
-                      '.',
+                      ' kabul etmiş olursunuz.',
                       style: TextStyle(
                           fontSize: 14, color: AppColors.textSecondaryColor),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: IconButton(
+                  icon: const Icon(Icons.fingerprint, size: 32),
+                  onPressed: onBiometricAuthPressed,
+                  color: AppColors.textPrimaryColor,
                 ),
               ),
             ],

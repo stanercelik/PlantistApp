@@ -2,12 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plantist_app_/Components/custom_text_field.dart';
+import 'package:plantist_app_/Model/todo_model.dart';
 import 'package:plantist_app_/Resources/app_colors.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/AddToDoDetailBottomSheet/add_todo_details_bs.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/add_todo_viewmodel.dart';
 
 class AddTodoScreen extends StatefulWidget {
-  const AddTodoScreen({super.key});
+  final Todo? todo;
+
+  const AddTodoScreen({super.key, this.todo});
 
   @override
   _AddTodoScreenState createState() => _AddTodoScreenState();
@@ -16,8 +19,25 @@ class AddTodoScreen extends StatefulWidget {
 class _AddTodoScreenState extends State<AddTodoScreen> {
   final AddTodoViewModel viewModel = Get.put(AddTodoViewModel());
 
-  void _showAddTodoDetailsBottomSheet(
-      BuildContext context, String title, String note) {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.todo != null) {
+      viewModel.titleController.text = widget.todo!.title;
+      viewModel.noteController.text = widget.todo!.note;
+      viewModel.setPriority(widget.todo!.priority);
+      viewModel.selectedDate.value = widget.todo!.dueDate;
+      viewModel.dateSwitch.value = true;
+      viewModel.selectedTime.value = widget.todo!.dueTime;
+      viewModel.timeSwitch.value = widget.todo!.dueTime != null;
+      viewModel.category.value =
+          viewModel.categoryList.indexOf(widget.todo!.category);
+      viewModel.tags.assignAll(widget.todo!.tags);
+      viewModel.attachment.value = widget.todo!.attachment;
+    }
+  }
+
+  void _showAddTodoDetailsBottomSheet(BuildContext context, Todo? todo) {
     Get.back();
     showModalBottomSheet(
       context: context,
@@ -25,7 +45,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => AddTodoDetailsScreen(title: title, note: note),
+      builder: (context) => AddTodoDetailsScreen(todo: todo),
     );
   }
 
@@ -89,10 +109,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                     return;
                   }
 
-                  _showAddTodoDetailsBottomSheet(
-                      context,
-                      viewModel.titleController.text,
-                      viewModel.noteController.text);
+                  _showAddTodoDetailsBottomSheet(context, widget.todo);
                 },
               ),
             ),
@@ -125,10 +142,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
             ),
             GestureDetector(
               onTap: () {
-                _showAddTodoDetailsBottomSheet(
-                    context,
-                    viewModel.titleController.text,
-                    viewModel.noteController.text);
+                _showAddTodoDetailsBottomSheet(context, widget.todo);
               },
               child: Padding(
                 padding: const EdgeInsets.only(top: 8.0),

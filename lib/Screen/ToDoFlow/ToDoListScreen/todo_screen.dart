@@ -9,6 +9,8 @@ import 'package:plantist_app_/Screen/AuthFlow/SignInFlow/SignInScreen/sign_in_vi
 import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/AddToDoBottomSheet/add_todo_bs.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/add_todo_viewmodel.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_viewmodel.dart';
+import 'package:plantist_app_/Utils/notification_helper.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class ToDoScreen extends StatelessWidget {
   final TodoListViewModel todoVM = Get.put(TodoListViewModel());
@@ -21,7 +23,7 @@ class ToDoScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => const AddTodoScreen(),
+      builder: (context) => AddTodoScreen(todo: todo),
     );
   }
 
@@ -113,8 +115,6 @@ class ToDoScreen extends StatelessWidget {
                   }
                   groupedTodos[dateKey]!.add(todo);
                 }
-                print(
-                    "Grouped TODOs: ${groupedTodos.keys.length}"); // Debug loguna ekleyin
                 return ListView(
                   children: groupedTodos.keys.map((dateKey) {
                     List<Todo> todos = groupedTodos[dateKey]!;
@@ -261,9 +261,8 @@ class ToDoScreen extends StatelessWidget {
           Column(
             children: [
               TextButton(
-                onPressed: () => viewmodel.signOut(),
-                child: const Text("Sign Out"),
-              ),
+                  onPressed: () => viewmodel.signOut(),
+                  child: const Text("sign out")),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: CustomWideButton(

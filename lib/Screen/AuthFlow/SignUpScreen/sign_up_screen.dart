@@ -11,9 +11,9 @@ class SignUpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BaseAuthScreen(
-      title: 'Sign up with email',
-      subtitle: 'Enter your email and password',
-      buttonText: 'Create Account',
+      title: 'E-posta ile kayıt ol',
+      subtitle: 'E-posta ve şifrenizi girin',
+      buttonText: 'Hesap Oluştur',
       emailController: _signUpViewModel.emailController,
       passwordController: _signUpViewModel.passwordController,
       isEmailValid: _signUpViewModel.isEmailValid,
@@ -21,6 +21,7 @@ class SignUpScreen extends StatelessWidget {
       isLoading: _signUpViewModel.isLoading,
       haveForgotPassword: false.obs,
       onButtonPressed: () => _signUpViewModel.createUser(),
+      onBiometricAuthPressed: () => _signUpViewModel.signUpWithBiometrics(),
     );
   }
 }

@@ -39,6 +39,7 @@ class SignInScreen extends StatelessWidget {
           ),
         );
       },
+      onBiometricAuthPressed: () => _signInViewModel.signInWithBiometrics(),
     );
   }
 }
