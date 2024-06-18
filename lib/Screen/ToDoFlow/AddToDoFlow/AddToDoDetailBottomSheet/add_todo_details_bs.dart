@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:plantist_app_/Components/custom_text_field.dart';
 import 'package:plantist_app_/Model/todo_model.dart';
 import 'package:plantist_app_/Resources/app_colors.dart';
@@ -17,23 +16,27 @@ class AddTodoDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AddTodoViewModel viewModel = Get.put(AddTodoViewModel());
 
-    if (todo != null) {
-      viewModel.todoId = todo!.id;
-      viewModel.titleController.text = todo!.title;
-      viewModel.noteController.text = todo!.note;
-      viewModel.setPriority(todo!.priority);
-      viewModel.selectedDate.value = todo!.dueDate;
-      viewModel.dateSwitch.value = true;
-      viewModel.selectedTime.value = todo!.dueTime;
-      viewModel.timeSwitch.value = todo!.dueTime != null;
-      viewModel.category.value = viewModel.categoryList.indexOf(todo!.category);
-      viewModel.tags.assignAll(todo!.tags);
-      viewModel.attachment.value = todo!.attachment;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (todo != null) {
+        viewModel.todoId = todo!.id;
+        viewModel.titleController.text = todo!.title;
+        viewModel.noteController.text = todo!.note;
+        viewModel.setPriority(todo!.priority);
+        viewModel.selectedDate.value = todo!.dueDate;
+        viewModel.dateSwitch.value = true;
+        viewModel.selectedTime.value = todo!.dueTime;
+        viewModel.timeSwitch.value = todo!.dueTime != null;
+        viewModel.category.value =
+            viewModel.categoryList.indexOf(todo!.category);
+        viewModel.tags.assignAll(todo!.tags);
+        viewModel.attachment.value = todo!.attachment;
+      }
+    });
 
     return SizedBox(
       height: ScreenUtil.screenHeightPercentage(context, 0.9),
       child: SingleChildScrollView(
+        controller: viewModel.scrollController,
         child: Padding(
           padding: EdgeInsets.only(
             left: 16,
@@ -102,6 +105,17 @@ class AddTodoDetailsScreen extends StatelessWidget {
                           fontWeight: FontWeight.w400,
                           fontSize: 19),
                     ),
+                    subtitle: viewModel.dateSwitch.value &&
+                            viewModel.selectedDate.value != null
+                        ? Text(
+                            viewModel.getFormattedDate(
+                                viewModel.selectedDate.value!),
+                            style: const TextStyle(
+                              color: AppColors.textSecondaryColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          )
+                        : null,
                     trailing: CupertinoSwitch(
                       value: viewModel.dateSwitch.value,
                       onChanged: (value) {
@@ -123,11 +137,6 @@ class AddTodoDetailsScreen extends StatelessWidget {
                         lastDate: DateTime(2101),
                         onDateChanged: (date) => viewModel.setDate(date),
                       ),
-                      if (viewModel.selectedDate.value != null)
-                        ListTile(
-                          title: Text(DateFormat('MMMM d, yyyy')
-                              .format(viewModel.selectedDate.value!)),
-                        ),
                     ],
                   );
                 }
@@ -154,6 +163,16 @@ class AddTodoDetailsScreen extends StatelessWidget {
                           fontWeight: FontWeight.w400,
                           fontSize: 20),
                     ),
+                    subtitle: viewModel.timeSwitch.value &&
+                            viewModel.selectedTime.value != null
+                        ? Text(
+                            viewModel.selectedTime.value!.format(context),
+                            style: const TextStyle(
+                              color: AppColors.textSecondaryColor,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          )
+                        : null,
                     trailing: CupertinoSwitch(
                       value: viewModel.timeSwitch.value,
                       onChanged: (value) {
@@ -175,22 +194,50 @@ class AddTodoDetailsScreen extends StatelessWidget {
                           child: CupertinoDatePicker(
                             mode: CupertinoDatePickerMode.time,
                             onDateTimeChanged: (DateTime newTime) {
-                              viewModel.setTime(TimeOfDay(
-                                  hour: newTime.hour, minute: newTime.minute));
+                              final now = DateTime.now();
+                              if (viewModel.selectedDate.value != null) {
+                                final selectedDate =
+                                    viewModel.selectedDate.value!;
+                                final selectedDateTime = DateTime(
+                                  selectedDate.year,
+                                  selectedDate.month,
+                                  selectedDate.day,
+                                  newTime.hour,
+                                  newTime.minute,
+                                );
+
+                                if (selectedDate.isAtSameMomentAs(
+                                    DateTime(now.year, now.month, now.day))) {
+                                  if (selectedDateTime.isAfter(now)) {
+                                    viewModel.setTime(TimeOfDay(
+                                      hour: newTime.hour,
+                                      minute: newTime.minute,
+                                    ));
+                                  } else {}
+                                } else {
+                                  viewModel.setTime(TimeOfDay(
+                                    hour: newTime.hour,
+                                    minute: newTime.minute,
+                                  ));
+                                }
+                              } else {
+                                viewModel.setTime(TimeOfDay(
+                                  hour: newTime.hour,
+                                  minute: newTime.minute,
+                                ));
+                              }
                             },
                             initialDateTime: DateTime(
-                                0,
-                                0,
-                                0,
-                                viewModel.selectedTime.value?.hour ?? 0,
-                                viewModel.selectedTime.value?.minute ?? 0),
+                              DateTime.now().year,
+                              DateTime.now().month,
+                              DateTime.now().day,
+                              viewModel.selectedTime.value?.hour ??
+                                  TimeOfDay.now().hour,
+                              viewModel.selectedTime.value?.minute ??
+                                  TimeOfDay.now().minute,
+                            ),
                           ),
                         ),
-                        if (viewModel.selectedTime.value != null)
-                          ListTile(
-                            title: Text(
-                                viewModel.selectedTime.value!.format(context)),
-                          ),
                       ],
                     ),
                   );
@@ -296,12 +343,13 @@ class AddTodoDetailsScreen extends StatelessWidget {
                                 child: CupertinoPicker(
                                   itemExtent: 36.0,
                                   onSelectedItemChanged: (int index) {
-                                    viewModel.category.value = index;
+                                    viewModel.category.value = index + 1;
                                   },
                                   scrollController: FixedExtentScrollController(
-                                    initialItem: viewModel.category.value,
+                                    initialItem: viewModel.category.value - 1,
                                   ),
                                   children: viewModel.categoryList
+                                      .skip(1)
                                       .map((category) => PickerRowWidget(
                                             text: category,
                                           ))
@@ -330,7 +378,7 @@ class AddTodoDetailsScreen extends StatelessWidget {
                 },
                 child: Obx(() => DetailsContainerWidget(
                       title: "Category",
-                      value: viewModel.categoryList[viewModel.category.value],
+                      value: viewModel.selectedCategory,
                     )),
               ),
               Obx(() {
@@ -348,33 +396,37 @@ class AddTodoDetailsScreen extends StatelessWidget {
                 }
               }),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.only(bottom: 24.0, top: 12),
                 child: CustomTextField(
                   hintText: "Add Tags",
                   controller: viewModel.tagController,
+                  focusNode: viewModel.tagFocusNode,
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () {
-                      if (viewModel.tagController.text.isNotEmpty) {
-                        viewModel.addTag(viewModel.tagController.text);
-                      }
+                      viewModel.addTag(viewModel.tagController.text);
                     },
                   ),
                   onSubmitted: (tag) {
-                    if (tag.isNotEmpty) {
-                      viewModel.addTag(tag);
-                    }
+                    viewModel.addTag(tag);
+                    FocusScope.of(context).requestFocus(viewModel.tagFocusNode);
                   },
                 ),
               ),
-              Obx(() => Wrap(
-                    spacing: 8.0,
-                    children: viewModel.tags.map((tag) {
-                      return InputChip(
-                        label: Text(tag),
-                        onDeleted: () => viewModel.removeTag(tag),
-                      );
-                    }).toList(),
+              Obx(() => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: SizedBox(
+                      width: ScreenUtil.screenWidth(context),
+                      child: Wrap(
+                        spacing: 8.0,
+                        children: viewModel.tags.map((tag) {
+                          return InputChip(
+                            label: Text(tag),
+                            onDeleted: () => viewModel.removeTag(tag),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   )),
             ],
           ),

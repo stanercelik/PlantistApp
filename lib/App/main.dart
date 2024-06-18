@@ -5,7 +5,8 @@ import 'package:plantist_app_/Routes/routes.dart';
 import 'package:plantist_app_/Screen/AuthFlow/SignInFlow/SignInScreen/sign_in_screen.dart';
 import 'package:plantist_app_/Screen/AuthFlow/SignUpScreen/sign_up_screen.dart';
 import 'package:plantist_app_/Screen/AuthFlow/BaseAuth/user_auth_controller.dart';
-import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_screen.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/ToDoDetailScreen/todo_detail_view.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_screen.dart';
 import 'package:plantist_app_/Screen/WelcomeScreen/welcome_screen.dart';
 import 'package:get/get.dart';
 import 'package:plantist_app_/Utils/notification_helper.dart';
@@ -27,17 +28,24 @@ class PlantistApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ensure the UserAuthController is initialized
+    final UserAuthController userAuthController = Get.put(UserAuthController());
+
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: AppColors.backgroundColor,
-        body: WelcomeScreen(),
-      ),
+      home: Obx(() {
+        if (userAuthController.firebaseUser.value == null) {
+          return WelcomeScreen();
+        } else {
+          return ToDoListScreen();
+        }
+      }),
       getPages: [
         GetPage(name: Routes.welcomeScreen, page: () => WelcomeScreen()),
         GetPage(name: Routes.signInScreen, page: () => SignInScreen()),
         GetPage(name: Routes.signUpScreen, page: () => SignUpScreen()),
-        GetPage(name: Routes.toDoScreen, page: () => ToDoScreen()),
+        GetPage(name: Routes.toDoScreen, page: () => ToDoListScreen()),
+        GetPage(name: Routes.toDoDetailScreen, page: () => ToDoDetailScreen()),
       ],
     );
   }

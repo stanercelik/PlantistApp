@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:plantist_app_/Model/todo_model.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_viewmodel.dart';
 import 'package:plantist_app_/Utils/notification_helper.dart';
@@ -20,9 +21,12 @@ class AddTodoViewModel extends GetxController {
   final priority = Priority.none.obs;
   final category = 0.obs;
   final attachment = Rxn<dynamic>();
+  final ScrollController scrollController = ScrollController();
+  final FocusNode tagFocusNode = FocusNode();
   String? todoId;
 
   final categoryList = [
+    "None",
     "Work",
     "Personal",
     "Health",
@@ -39,6 +43,33 @@ class AddTodoViewModel extends GetxController {
     "Others",
   ];
 
+  String get selectedCategory =>
+      category.value == 0 ? "None" : categoryList[category.value];
+
+  @override
+  void onInit() {
+    super.onInit();
+    tagFocusNode.addListener(_scrollToBottom);
+    tagController.addListener(() {
+      if (tagController.text.endsWith('\n')) {
+        addTag(tagController.text.trim());
+        tagController.clear();
+      }
+    });
+  }
+
+  void _scrollToBottom() {
+    if (tagFocusNode.hasFocus) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+  }
+
   void setDate(DateTime date) {
     selectedDate.value = date;
     updateFormValidState();
@@ -50,9 +81,23 @@ class AddTodoViewModel extends GetxController {
   }
 
   void addTag(String tag) {
-    tags.add(tag);
-    tagController.clear();
-    updateFormValidState();
+    if (tags.length < 5 && tag.isNotEmpty && !tags.contains(tag)) {
+      tags.add(tag);
+      tagController.clear();
+      updateFormValidState();
+      Future.delayed(const Duration(milliseconds: 100), () {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    } else if (tags.length >= 5) {
+      Get.snackbar("Limit reached", "You can only add up to 5 tags.",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white);
+    }
   }
 
   void removeTag(String tag) {
@@ -81,8 +126,46 @@ class AddTodoViewModel extends GetxController {
 
   void saveTodo() async {
     if (!isFormValid()) {
-      Get.snackbar("Error", "Please fill in all fields: ${missingFields()}",
-          snackPosition: SnackPosition.TOP);
+      Get.snackbar(
+        "Error",
+        "Please fill in all fields: ${missingFields()}",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    final now = DateTime.now();
+    DateTime selectedDateTime;
+
+    if (selectedDate.value != null) {
+      selectedDateTime = DateTime(
+        selectedDate.value!.year,
+        selectedDate.value!.month,
+        selectedDate.value!.day,
+        selectedTime.value?.hour ?? 0,
+        selectedTime.value?.minute ?? 0,
+      );
+    } else {
+      Get.snackbar(
+        "Invalid Date",
+        "Selected date is not valid.",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (selectedDateTime.isBefore(now)) {
+      Get.snackbar(
+        "Invalid Date/Time",
+        "Selected date and time cannot be in the past.",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
       return;
     }
 
@@ -109,18 +192,19 @@ class AddTodoViewModel extends GetxController {
       });
     } else {
       // Existing Todo - Update
-      final existingDoc = await todoController.getTodoDocument(todo.id);
-      if (existingDoc.exists) {
-        todoController.updateTodo(todo.id, todo.toMap()).then((value) {
+      try {
+        final existingDoc = await todoController.getTodoDocument(todo.id);
+        if (existingDoc.exists) {
+          await todoController.updateTodo(todo.id, todo.toMap());
           _scheduleNotifications(todo);
           todoController.fetchTodos();
           Get.back();
-        }).catchError((error) {
-          Get.snackbar("Error", error.toString());
-        });
-      } else {
-        Get.snackbar("Error", "Document not found",
-            snackPosition: SnackPosition.TOP);
+        } else {
+          Get.snackbar("Error", "Document not found",
+              snackPosition: SnackPosition.TOP);
+        }
+      } catch (error) {
+        Get.snackbar("Error", error.toString());
       }
     }
   }
@@ -181,6 +265,21 @@ class AddTodoViewModel extends GetxController {
   @override
   void onClose() {
     super.onClose();
+    tagFocusNode.removeListener(_scrollToBottom);
     clearAllFields();
+  }
+
+  String getFormattedDate(DateTime date) {
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day);
+    DateTime tomorrow = today.add(const Duration(days: 1));
+
+    if (date.isAtSameMomentAs(today)) {
+      return "Today";
+    } else if (date.isAtSameMomentAs(tomorrow)) {
+      return "Tomorrow";
+    } else {
+      return DateFormat('MMMM d, yyyy').format(date);
+    }
   }
 }

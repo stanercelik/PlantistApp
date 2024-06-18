@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_screen.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_screen.dart';
 import 'package:plantist_app_/Screen/WelcomeScreen/welcome_screen.dart';
 
 class UserAuthController extends GetxController {
   static UserAuthController instance = Get.find();
-  late Rx<User?> firebaseUser;
+  Rx<User?> firebaseUser = Rx<User?>(null);
   FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
@@ -20,7 +20,7 @@ class UserAuthController extends GetxController {
     if (user == null) {
       Get.offAll(() => WelcomeScreen());
     } else {
-      Get.offAll(() => ToDoScreen());
+      Get.offAll(() => ToDoListScreen());
     }
   }
 

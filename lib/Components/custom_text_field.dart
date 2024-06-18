@@ -16,6 +16,8 @@ class CustomTextField extends StatelessWidget {
   final Function? onSubmitted;
   final TextStyle hintStyle;
   final RxBool obscureTextRx;
+  final FocusNode? focusNode;
+  final TextInputAction textInputAction;
 
   CustomTextField({
     Key? key,
@@ -37,6 +39,8 @@ class CustomTextField extends StatelessWidget {
     this.showValidationIcon = true,
     this.suffixIcon,
     this.onSubmitted,
+    this.focusNode,
+    this.textInputAction = TextInputAction.done,
   })  : obscureTextRx = obscureText.obs,
         super(key: key);
 
@@ -52,8 +56,14 @@ class CustomTextField extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
         cursorColor: Colors.deepPurpleAccent,
+        focusNode: focusNode,
         keyboardType: keyboardType,
-        onSubmitted: (value) => onSubmitted,
+        textInputAction: textInputAction,
+        onSubmitted: (value) {
+          if (onSubmitted != null) {
+            onSubmitted!(value);
+          }
+        },
         decoration: InputDecoration(
             hintText: hintText,
             hintStyle: hintStyle,

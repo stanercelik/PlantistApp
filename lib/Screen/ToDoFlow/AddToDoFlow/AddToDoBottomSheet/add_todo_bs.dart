@@ -22,31 +22,23 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.todo != null) {
-      viewModel.titleController.text = widget.todo!.title;
-      viewModel.noteController.text = widget.todo!.note;
-      viewModel.setPriority(widget.todo!.priority);
-      viewModel.selectedDate.value = widget.todo!.dueDate;
-      viewModel.dateSwitch.value = true;
-      viewModel.selectedTime.value = widget.todo!.dueTime;
-      viewModel.timeSwitch.value = widget.todo!.dueTime != null;
-      viewModel.category.value =
-          viewModel.categoryList.indexOf(widget.todo!.category);
-      viewModel.tags.assignAll(widget.todo!.tags);
-      viewModel.attachment.value = widget.todo!.attachment;
-    }
-  }
-
-  void _showAddTodoDetailsBottomSheet(BuildContext context, Todo? todo) {
-    Get.back();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => AddTodoDetailsScreen(todo: todo),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.todo != null) {
+        viewModel.titleController.text = widget.todo!.title;
+        viewModel.noteController.text = widget.todo!.note;
+        viewModel.setPriority(widget.todo!.priority);
+        viewModel.selectedDate.value = widget.todo!.dueDate;
+        viewModel.dateSwitch.value = true;
+        viewModel.selectedTime.value = widget.todo!.dueTime;
+        viewModel.timeSwitch.value = widget.todo!.dueTime != null;
+        viewModel.category.value =
+            viewModel.categoryList.indexOf(widget.todo!.category);
+        viewModel.tags.assignAll(widget.todo!.tags);
+        viewModel.attachment.value = widget.todo!.attachment;
+        viewModel.todoId =
+            widget.todo!.id; // Set todoId for updating existing todo
+      }
+    });
   }
 
   @override
@@ -100,16 +92,17 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                 ),
                 onPressed: () {
                   if (!viewModel.isFormValid()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            "Please fill in all fields: ${viewModel.missingFields()}"),
-                      ),
+                    Get.snackbar(
+                      "Error",
+                      "Please fill in all fields: ${viewModel.missingFields()}",
+                      snackPosition: SnackPosition.TOP,
+                      backgroundColor: Colors.redAccent,
+                      colorText: Colors.white,
                     );
                     return;
                   }
 
-                  _showAddTodoDetailsBottomSheet(context, widget.todo);
+                  viewModel.saveTodo();
                 },
               ),
             ),
@@ -152,35 +145,36 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                         borderRadius: BorderRadius.circular(12),
                         border:
                             Border.all(color: Colors.grey.withOpacity(0.5))),
-                    child: const Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 "Details",
                                 style: TextStyle(
                                     color: AppColors.textPrimaryColor,
                                     fontWeight: FontWeight.w400,
                                     fontSize: 19),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 2,
                               ),
                               Text(
-                                "Today",
-                                style: TextStyle(
+                                viewModel.getFormattedDate(
+                                    widget.todo?.dueDate ?? DateTime.now()),
+                                style: const TextStyle(
                                     color: AppColors.textSecondaryColor,
                                     fontWeight: FontWeight.w400,
                                     fontSize: 15),
                               ),
                             ],
                           ),
-                          Icon(
+                          const Icon(
                             Icons.arrow_forward_ios,
                             color: Colors.grey,
                             size: 20,
@@ -205,5 +199,17 @@ void showAddTodoBottomSheet(BuildContext context) {
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
     builder: (context) => const AddTodoScreen(),
+  );
+}
+
+void _showAddTodoDetailsBottomSheet(BuildContext context, Todo? todo) {
+  Get.back();
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) => AddTodoDetailsScreen(todo: todo),
   );
 }

@@ -8,16 +8,16 @@ import 'package:plantist_app_/Resources/app_colors.dart';
 import 'package:plantist_app_/Screen/AuthFlow/SignInFlow/SignInScreen/sign_in_viewmodel.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/AddToDoBottomSheet/add_todo_bs.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/add_todo_viewmodel.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/ToDoDetailScreen/todo_detail_view.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/ToDoDetailScreen/todo_detail_viewmodel.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_viewmodel.dart';
-import 'package:plantist_app_/Utils/notification_helper.dart';
-import 'package:timezone/timezone.dart' as tz;
 
-class ToDoScreen extends StatelessWidget {
+class ToDoListScreen extends StatelessWidget {
   final TodoListViewModel todoVM = Get.put(TodoListViewModel());
   final TextEditingController _searchController = TextEditingController();
   final SignInViewModel viewmodel = SignInViewModel();
 
-  ToDoScreen({super.key});
+  ToDoListScreen({super.key});
 
   void _showAddTodoBottomSheet(BuildContext context, {Todo? todo}) {
     showModalBottomSheet(
@@ -247,6 +247,12 @@ class ToDoScreen extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                                onTap: () {
+                                  ToDoDetailViewModel toDoDetailVM =
+                                      Get.put(ToDoDetailViewModel());
+                                  toDoDetailVM.setTodoDetail(todo);
+                                  Get.to(ToDoDetailScreen());
+                                },
                               ),
                             ),
                           );

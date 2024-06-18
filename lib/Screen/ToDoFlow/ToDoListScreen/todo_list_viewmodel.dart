@@ -86,12 +86,21 @@ class TodoListViewModel extends GetxController {
       String todoId, Map<String, dynamic> updatedData) async {
     User? user = _auth.currentUser;
     if (user != null) {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('todos')
-          .doc(todoId)
-          .update(updatedData);
+      print("Updating TODO: $updatedData");
+      try {
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('todos')
+            .doc(todoId)
+            .set(updatedData, SetOptions(merge: true));
+        print("Todo Updated Successfully");
+        fetchTodos(); // Güncelleme sonrasında verileri tekrar çekiyoruz
+      } catch (error) {
+        print("Failed to update Todo: $error");
+      }
+    } else {
+      print("User not logged in");
     }
   }
 
