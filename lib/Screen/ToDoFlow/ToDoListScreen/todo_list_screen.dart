@@ -19,14 +19,6 @@ class ToDoListScreen extends StatelessWidget {
 
   ToDoListScreen({super.key});
 
-  void _showAddTodoBottomSheet(BuildContext context, {Todo? todo}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => AddTodoScreen(todo: todo),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +68,7 @@ class ToDoListScreen extends StatelessWidget {
                 todoVM.toggleSearch();
                 if (!todoVM.isSearching.value) {
                   _searchController.clear();
-                  todoVM.searchTodos(''); // Clear search results
+                  todoVM.applyFilters(); // Clear search results
                 }
               },
             ),
@@ -87,6 +79,50 @@ class ToDoListScreen extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
+            child: SizedBox(
+              height: 35,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  Obx(() => _buildFilterButton(
+                      context,
+                      "Category",
+                      todoVM.selectedCategory.value,
+                      () => _showCategoryPicker(context),
+                      () => todoVM.setCategory(todoVM.selectedCategory.value),
+                      todoVM.selectedCategory.value.isNotEmpty)),
+                  Obx(() => _buildFilterButton(
+                      context,
+                      "Date",
+                      todoVM.selectedDate.value != null
+                          ? DateFormat('dd.MM.yyyy')
+                              .format(todoVM.selectedDate.value!)
+                          : "",
+                      () => _showDatePicker(context),
+                      () => todoVM.setDate(todoVM.selectedDate.value),
+                      todoVM.selectedDate.value != null)),
+                  Obx(() => _buildFilterButton(
+                      context,
+                      "Priority",
+                      todoVM.selectedPriority.value != null
+                          ? priorityToString(todoVM.selectedPriority.value!)
+                          : "",
+                      () => _showPriorityPicker(context),
+                      () => todoVM.setPriority(todoVM.selectedPriority.value),
+                      todoVM.selectedPriority.value != null)),
+                  Obx(() => _buildFilterButton(
+                      context,
+                      "Tags",
+                      todoVM.selectedTags.isNotEmpty ? "Tags Selected" : "",
+                      () => _showTagPicker(context),
+                      () => todoVM.clearTags(),
+                      todoVM.selectedTags.isNotEmpty)),
+                ],
+              ),
+            ),
+          ),
           Expanded(
             child: Obx(() {
               if (todoVM.filteredTodos.isEmpty) {
@@ -251,7 +287,7 @@ class ToDoListScreen extends StatelessWidget {
                                   ToDoDetailViewModel toDoDetailVM =
                                       Get.put(ToDoDetailViewModel());
                                   toDoDetailVM.setTodoDetail(todo);
-                                  Get.to(ToDoDetailScreen());
+                                  Get.to(() => ToDoDetailScreen());
                                 },
                               ),
                             ),
@@ -286,6 +322,155 @@ class ToDoListScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildFilterButton(
+      BuildContext context,
+      String label,
+      String selectedValue,
+      VoidCallback onTap,
+      VoidCallback onLongPress,
+      bool isActive) {
+    return GestureDetector(
+      onLongPress: onLongPress,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+          decoration: BoxDecoration(
+            color: isActive
+                ? AppColors.enabledButtonColor
+                : AppColors.disabledButtonColor,
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Center(
+            child: Text(
+              selectedValue.isEmpty ? label : selectedValue,
+              style: TextStyle(
+                  color: isActive ? Colors.white : AppColors.textPrimaryColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCategoryPicker(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Select Category"),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              children: todoVM.todos
+                  .map((todo) => todo.category)
+                  .toSet()
+                  .map((category) {
+                return RadioListTile(
+                  title: Text(category),
+                  value: category,
+                  groupValue: todoVM.selectedCategory.value,
+                  onChanged: (value) {
+                    todoVM.setCategory(value as String);
+                    Get.back();
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Clear"),
+              onPressed: () {
+                todoVM.setCategory('');
+                Get.back();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAddTodoBottomSheet(BuildContext context, {Todo? todo}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => AddTodoScreen(todo: todo),
+    );
+  }
+
+  void _showDatePicker(BuildContext context) {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    ).then((pickedDate) {
+      if (pickedDate != null) {
+        todoVM.setDate(pickedDate);
+      }
+    });
+  }
+
+  void _showPriorityPicker(BuildContext context) {
+    showMenu(
+      context: context,
+      position: const RelativeRect.fromLTRB(50.0, 100.0, 50.0, 100.0),
+      items: Priority.values.map((priority) {
+        return PopupMenuItem(
+          value: priority,
+          child: Text(priorityToString(priority)),
+        );
+      }).toList(),
+    ).then((selectedPriority) {
+      if (selectedPriority != null) {
+        todoVM.setPriority(selectedPriority);
+      }
+    });
+  }
+
+  void _showTagPicker(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Select Tags"),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Obx(() {
+              return ListView(
+                children:
+                    todoVM.todos.expand((todo) => todo.tags).toSet().map((tag) {
+                  return Obx(() {
+                    return CheckboxListTile(
+                      title: Text(tag),
+                      value: todoVM.selectedTags.contains(tag),
+                      onChanged: (isSelected) {
+                        todoVM.toggleTag(tag);
+                      },
+                    );
+                  });
+                }).toList(),
+              );
+            }),
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Done"),
+              onPressed: () {
+                Get.back();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 Color getPriorityColor(Priority priority) {
@@ -299,5 +484,19 @@ Color getPriorityColor(Priority priority) {
     case Priority.none:
     default:
       return Colors.grey;
+  }
+}
+
+String priorityToString(Priority priority) {
+  switch (priority) {
+    case Priority.high:
+      return 'High';
+    case Priority.medium:
+      return 'Medium';
+    case Priority.low:
+      return 'Low';
+    case Priority.none:
+    default:
+      return 'None';
   }
 }

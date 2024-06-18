@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:plantist_app_/Model/todo_model.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/add_todo_viewmodel.dart';
 import 'package:plantist_app_/Utils/notification_helper.dart';
 
 class TodoListViewModel extends GetxController {
@@ -12,6 +13,10 @@ class TodoListViewModel extends GetxController {
   RxList<Todo> filteredTodos = RxList<Todo>();
   RxBool isSearching = false.obs;
   RxString searchQuery = ''.obs;
+  RxString selectedCategory = ''.obs;
+  Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
+  Rx<Priority?> selectedPriority = Rx<Priority?>(null);
+  RxList<String> selectedTags = RxList<String>();
 
   @override
   void onInit() {
@@ -26,7 +31,7 @@ class TodoListViewModel extends GetxController {
         Todo todo = Todo.fromMap(doc.id, data ?? {});
         return todo;
       }).toList();
-      filteredTodos.assignAll(todos);
+      applyFilters();
     });
   }
 
@@ -41,6 +46,95 @@ class TodoListViewModel extends GetxController {
     } else {
       throw Exception("User not logged in");
     }
+  }
+
+  void applyFilters() {
+    filteredTodos.assignAll(
+      todos.where((todo) {
+        bool matchesCategory = selectedCategory.value.isEmpty ||
+            todo.category == selectedCategory.value;
+        bool matchesDate = selectedDate.value == null ||
+            isSameDate(todo.dueDate, selectedDate.value!);
+        bool matchesPriority = selectedPriority.value == null ||
+            todo.priority == selectedPriority.value;
+        bool matchesTags = selectedTags.isEmpty ||
+            selectedTags.every((tag) => todo.tags.contains(tag));
+        bool matchesSearchQuery = searchQuery.value.isEmpty ||
+            todo.title
+                .toLowerCase()
+                .contains(searchQuery.value.toLowerCase()) ||
+            todo.tags.any((tag) =>
+                tag.toLowerCase().contains(searchQuery.value.toLowerCase()));
+        return matchesCategory &&
+            matchesDate &&
+            matchesPriority &&
+            matchesTags &&
+            matchesSearchQuery;
+      }).toList(),
+    );
+  }
+
+  bool isSameDate(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
+  void setCategory(String category) {
+    if (selectedCategory.value == category) {
+      selectedCategory.value = '';
+    } else {
+      selectedCategory.value = category;
+    }
+    applyFilters();
+    update();
+  }
+
+  void setDate(DateTime? date) {
+    if (selectedDate.value != null &&
+        date != null &&
+        isSameDate(selectedDate.value!, date)) {
+      selectedDate.value = null;
+    } else {
+      selectedDate.value = date;
+    }
+    applyFilters();
+    update();
+  }
+
+  void setPriority(Priority? priority) {
+    if (selectedPriority.value == priority) {
+      selectedPriority.value = null;
+    } else {
+      selectedPriority.value = priority;
+    }
+    applyFilters();
+    update();
+  }
+
+  void toggleTag(String tag) {
+    if (selectedTags.contains(tag)) {
+      selectedTags.remove(tag);
+    } else {
+      selectedTags.add(tag);
+    }
+    applyFilters();
+    update();
+  }
+
+  void clearTags() {
+    selectedTags.clear();
+    applyFilters();
+    update();
+  }
+
+  void clearFilters() {
+    selectedCategory.value = '';
+    selectedDate.value = null;
+    selectedPriority.value = null;
+    selectedTags.clear();
+    applyFilters();
+    update();
   }
 
   Future<DocumentSnapshot> getTodoDocument(String todoId) async {
@@ -86,7 +180,6 @@ class TodoListViewModel extends GetxController {
       String todoId, Map<String, dynamic> updatedData) async {
     User? user = _auth.currentUser;
     if (user != null) {
-      print("Updating TODO: $updatedData");
       try {
         await _firestore
             .collection('users')
@@ -94,8 +187,7 @@ class TodoListViewModel extends GetxController {
             .collection('todos')
             .doc(todoId)
             .set(updatedData, SetOptions(merge: true));
-        print("Todo Updated Successfully");
-        fetchTodos(); // Güncelleme sonrasında verileri tekrar çekiyoruz
+        fetchTodos();
       } catch (error) {
         print("Failed to update Todo: $error");
       }
@@ -106,15 +198,16 @@ class TodoListViewModel extends GetxController {
 
   void searchTodos(String query) {
     if (query.isEmpty) {
-      filteredTodos.assignAll(todos);
+      applyFilters();
     } else {
       filteredTodos.assignAll(
-        todos
-            .where((todo) =>
-                todo.title.toLowerCase().contains(query.toLowerCase()) ||
-                todo.tags.any(
-                    (tag) => tag.toLowerCase().contains(query.toLowerCase())))
-            .toList(),
+        todos.where((todo) {
+          bool matchesTitle =
+              todo.title.toLowerCase().contains(query.toLowerCase());
+          bool matchesTags = todo.tags
+              .any((tag) => tag.toLowerCase().contains(query.toLowerCase()));
+          return matchesTitle || matchesTags;
+        }).toList(),
       );
     }
   }
