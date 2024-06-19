@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_screen.dart';
-import 'package:plantist_app_/Screen/WelcomeScreen/welcome_screen.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_view.dart';
+import 'package:plantist_app_/Screen/WelcomeScreen/welcome_view.dart';
 
-class UserAuthController extends GetxController {
-  static UserAuthController instance = Get.find();
+class UserAuthViewModel extends GetxController {
+  static UserAuthViewModel instance = Get.find();
   Rx<User?> firebaseUser = Rx<User?>(null);
   FirebaseAuth auth = FirebaseAuth.instance;
 

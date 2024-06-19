@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:plantist_app_/Components/custom_text_field.dart';
 import 'package:plantist_app_/Model/todo_model.dart';
 import 'package:plantist_app_/Resources/app_colors.dart';
-import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/add_todo_viewmodel.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/add_todo_flow_viewmodel.dart';
 import 'package:plantist_app_/Utils/screen_util.dart';
 
 class AddTodoDetailsScreen extends StatelessWidget {
@@ -29,7 +29,7 @@ class AddTodoDetailsScreen extends StatelessWidget {
         viewModel.category.value =
             viewModel.categoryList.indexOf(todo!.category);
         viewModel.tags.assignAll(todo!.tags);
-        viewModel.attachment.value = todo!.attachment;
+        viewModel.attachmentUrl.value = todo!.attachment;
       }
     });
 
@@ -213,7 +213,7 @@ class AddTodoDetailsScreen extends StatelessWidget {
                                       hour: newTime.hour,
                                       minute: newTime.minute,
                                     ));
-                                  } else {}
+                                  }
                                 } else {
                                   viewModel.setTime(TimeOfDay(
                                     hour: newTime.hour,
@@ -389,9 +389,14 @@ class AddTodoDetailsScreen extends StatelessWidget {
                     icon: Icons.attach_file,
                   );
                 } else {
-                  return const DetailsContainerWidget(
-                    title: "Attach a file",
-                    icon: Icons.attach_file,
+                  return GestureDetector(
+                    onTap: () async {
+                      await viewModel.pickFile();
+                    },
+                    child: const DetailsContainerWidget(
+                      title: "Attach a file",
+                      icon: Icons.attach_file,
+                    ),
                   );
                 }
               }),

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:plantist_app_/Resources/app_colors.dart';
 import 'package:plantist_app_/Routes/routes.dart';
-import 'package:plantist_app_/Screen/AuthFlow/SignInFlow/SignInScreen/sign_in_screen.dart';
-import 'package:plantist_app_/Screen/AuthFlow/SignUpScreen/sign_up_screen.dart';
-import 'package:plantist_app_/Screen/AuthFlow/BaseAuth/user_auth_controller.dart';
+import 'package:plantist_app_/Screen/AuthFlow/SignInFlow/SignInScreen/sign_in_view.dart';
+import 'package:plantist_app_/Screen/AuthFlow/SignUpScreen/sign_up_view.dart';
+import 'package:plantist_app_/Screen/AuthFlow/BaseAuth/user_auth_viewmodel.dart';
 import 'package:plantist_app_/Screen/ToDoFlow/ToDoDetailScreen/todo_detail_view.dart';
-import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_screen.dart';
-import 'package:plantist_app_/Screen/WelcomeScreen/welcome_screen.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/ToDoListScreen/todo_list_view.dart';
+import 'package:plantist_app_/Screen/WelcomeScreen/welcome_view.dart';
 import 'package:get/get.dart';
 import 'package:plantist_app_/Utils/notification_helper.dart';
+import 'package:plantist_app_/Utils/permission_helper.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -19,7 +19,8 @@ void main() async {
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Europe/Istanbul'));
   await NotificationHelper.initialize();
-  Get.put(UserAuthController());
+  await PermissionHelper.requestPermissions();
+  Get.put(UserAuthViewModel());
   runApp(const PlantistApp());
 }
 
@@ -28,8 +29,7 @@ class PlantistApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure the UserAuthController is initialized
-    final UserAuthController userAuthController = Get.put(UserAuthController());
+    final UserAuthViewModel userAuthController = Get.put(UserAuthViewModel());
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,

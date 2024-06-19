@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:plantist_app_/Service/auth_service.dart';
-import 'package:plantist_app_/Service/biometric_auth_service.dart';
+import 'package:plantist_app_/Services/auth_service.dart';
+import 'package:plantist_app_/Services/biometric_auth_service.dart';
 
 class SignUpViewModel extends GetxController {
   final AuthService _authService = AuthService();
