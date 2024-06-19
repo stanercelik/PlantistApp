@@ -36,7 +36,7 @@ class CustomWideButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
           ),
           elevation: 0,
-          splashFactory: NoSplash.splashFactory, // Disable the ripple effect
+          splashFactory: NoSplash.splashFactory,
         ),
         child: Stack(
           alignment: Alignment.center,

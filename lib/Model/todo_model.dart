@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/add_todo_viewmodel.dart';
+import 'package:plantist_app_/Screen/ToDoFlow/AddToDoFlow/add_todo_flow_viewmodel.dart';
 
 class Todo {
   final String id;
@@ -11,7 +11,7 @@ class Todo {
   final TimeOfDay? dueTime;
   final String category;
   final List<String> tags;
-  final dynamic attachment;
+  final String? attachment;
 
   Todo({
     required this.id,
@@ -67,7 +67,7 @@ class Todo {
       dueTime: parseTime(data['dueTime']),
       category: data['category'] ?? '',
       tags: List<String>.from(data['tags'] ?? []),
-      attachment: data['attachment'],
+      attachment: data['attachment'] as String?,
     );
   }
 
