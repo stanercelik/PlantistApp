@@ -32,6 +32,24 @@ class PlantistApp extends StatelessWidget {
     final UserAuthViewModel userAuthController = Get.put(UserAuthViewModel());
 
     return GetMaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontFamily: 'SFProRounded'),
+          bodyMedium: TextStyle(fontFamily: 'SFProRounded'),
+          displayLarge: TextStyle(fontFamily: 'SFProRounded'),
+          displayMedium: TextStyle(fontFamily: 'SFProRounded'),
+          displaySmall: TextStyle(fontFamily: 'SFProRounded'),
+          headlineMedium: TextStyle(fontFamily: 'SFProRounded'),
+          headlineSmall: TextStyle(fontFamily: 'SFProRounded'),
+          titleLarge: TextStyle(fontFamily: 'SFProRounded'),
+          titleMedium: TextStyle(fontFamily: 'SFProRounded'),
+          titleSmall: TextStyle(fontFamily: 'SFProRounded'),
+          bodySmall: TextStyle(fontFamily: 'SFProRounded'),
+          labelLarge: TextStyle(fontFamily: 'SFProRounded'),
+          labelSmall: TextStyle(fontFamily: 'SFProRounded'),
+        ),
+      ),
       debugShowCheckedModeBanner: false,
       home: Obx(() {
         if (userAuthController.firebaseUser.value == null) {

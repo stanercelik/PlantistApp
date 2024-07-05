@@ -17,7 +17,7 @@ class TitleContentRow extends StatelessWidget {
         fontWeight: FontWeight.w400),
     this.titleStyle = const TextStyle(
       fontSize: 22,
-      fontWeight: FontWeight.bold,
+      fontWeight: FontWeight.w700,
       color: AppColors.textPrimaryColor,
     ),
   }) : super(key: key);

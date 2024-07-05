@@ -480,7 +480,7 @@ class DetailsContainerWidget extends StatelessWidget {
                   style: const TextStyle(
                       color: AppColors.textSecondaryColor,
                       fontSize: 19,
-                      fontWeight: FontWeight.normal),
+                      fontWeight: FontWeight.w400),
                 ),
                 const SizedBox(
                   width: 4,

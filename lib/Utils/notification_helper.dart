@@ -10,9 +10,17 @@ class NotificationHelper {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('mipmap/ic_launcher');
 
+    const DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
     const InitializationSettings initializationSettings =
         InitializationSettings(
       android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin,
     );
 
     await _notifications.initialize(initializationSettings);
@@ -74,6 +82,7 @@ class NotificationHelper {
         priority: Priority.high,
         showWhen: true,
       ),
+      iOS: DarwinNotificationDetails(),
     );
   }
 
@@ -87,6 +96,7 @@ class NotificationHelper {
         priority: Priority.high,
         showWhen: true,
       ),
+      iOS: DarwinNotificationDetails(),
     );
   }
 

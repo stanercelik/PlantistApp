@@ -38,7 +38,7 @@ class WelcomeScreen extends StatelessWidget {
                       style: TextStyle(
                           color: AppColors.textPrimaryColor,
                           fontSize: 42,
-                          fontWeight: FontWeight.w200),
+                          fontWeight: FontWeight.w300),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
@@ -47,7 +47,7 @@ class WelcomeScreen extends StatelessWidget {
                       style: TextStyle(
                           color: AppColors.textPrimaryColor,
                           fontSize: 42,
-                          fontWeight: FontWeight.bold),
+                          fontWeight: FontWeight.w700),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),

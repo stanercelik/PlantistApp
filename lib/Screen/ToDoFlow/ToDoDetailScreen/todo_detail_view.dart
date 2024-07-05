@@ -36,7 +36,7 @@ class ToDoDetailScreen extends StatelessWidget {
           style: TextStyle(
             color: AppColors.textPrimaryColor,
             fontSize: 24,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
           ),
         ),
         backgroundColor: AppColors.backgroundColor,
@@ -91,7 +91,7 @@ class ToDoDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       color: AppColors.textPrimaryColor,
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 8),
